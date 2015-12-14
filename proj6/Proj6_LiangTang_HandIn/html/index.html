@@ -1,0 +1,358 @@
+<html>
+<head>
+<title>Deep Learning Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang </h1>
+<h1><span style="color: #DE3737">GT ID:</span> 902941560 </h1>
+</div>
+</div>
+<div class="container">
+
+<h2> Project 6 / Deep Learning</h2>
+
+<!-- <div style="float: right; padding: 20px">
+<img src="placeholder.jpg" />
+<p style="font-size: 14px">Example of a right floating element.</p>
+</div> -->
+
+<h3><span style="color: #DE3737">Goal</h3>
+<p> 	
+	In this project, we intend to design and train deep convolutional networks for scene recognition using the MatConvNet toolbox.
+</p>
+
+<h3><span style="color: #DE3737">Method</h3>
+<p>
+	To realize the goal of scene recognition and achieve higher performance compared to those in project 4, we divided the project into two parts.
+	In Part 1 of the project, we train a deep convolutional network from scratch to recognize scenes. For Part 2, we used the pretrained VGG-F network which was not trained to recognize scenes at all.
+
+</p>
+<h4><span style="color: #DE3737">Part 1</h4>
+<p> The starter code gives us a very simple network architecture which doesn't work that well. In order to enhance the performance of the scene recognizer, we added and modified following parts:
+<ol>
+	<li>
+		Jittering, enhance accuracy to <span style="color: #DE3737">29%
+		<p>
+			For the scene recognition, flipping the image left to right helps enhance the performance. Besides, rotating and cropping the image with a random degree could also be employed, however, it did not help a lot.
+		</p>
+		<p>
+			Essentially, jittering is synthetically increase our amount of training data during the learning process. With more training data, the network will not get over fitting easily, though part of the training data is synthesized. Obviously, synthesized data is not as good as truly independent data.
+		</p>
+	</li>
+
+	<h4>Training epoch = 50, Learning rate = 0.0001</h4>
+	<center>
+	<img src="outputs/epoch60_rate0.0001/filter_p1_28.png"/>
+	<img src="outputs/epoch60_rate0.0001/epoch60_p1.png"/>
+	</center>
+	
+	<li>
+		Normalization, enhance accuracy to <span style="color: #DE3737">50%
+		<p>
+			Subtracting the mean from every image, as a common and simple method which is widely used in the training a convolutional neural network, improves the performance distinctively. 
+		</p>
+	</li>
+
+	<h4>Training epoch = 50, Learning rate = 0.0001</h4>
+	<center>
+	<img src="outputs/epoch60_rate0.0001/filter_p1p2_45.png"/>
+	<img src="outputs/epoch60_rate0.0001/epoch60_p1p2.png"/>
+	</center>
+
+	<li>
+		Regularization, enhance accuracy <span style="color: #DE3737">53%
+		<p>
+			Drop out is a practical and efficient method of regularization when the large amount of data is not available. Basically, it randomly turns off network connections at training time to get rid of overfitting. It can be seen to split the network into many thinner sub-network. At the same time, we end up with having more training epoch.
+		</p>
+	</li>
+
+	<h4>Training epoch = 60, Learning rate = 0.0001</h4>
+	<center>
+	<img src="outputs/epoch60_rate0.0001/filter_p1p2p3_49.5.png"/>
+	<img src="outputs/epoch60_rate0.0001/epoch60_p1p2p3.png"/>
+	</center>
+
+	<li>
+		Adding more layers, enhance accuracy to <span style="color: #DE3737">57%
+		<p>
+			To improve the performance further, a real 'deep' neural network is employed.At the same time, many more training epoch is necessary. By adding another max pooling layer, we reduce the window size of pervious pooling layer from 7 by 7 to 2 by 2, also changing the stride of that layer from 1 to 2.
+		</p>
+	</li>
+	<center>
+	<img src="outputs/networkPart1.png"/>
+	</center>
+
+	<h4>Training epoch = 150, Learning rate = 0.0001, Accuracy = 57% (Best result in Part 1)</h4>
+	<center>
+	<img src="outputs/filter_p1p2p3p4.png"/>
+	<img src="outputs/p1p2p3p4.png"/>
+	</center>
+
+</ol>
+
+
+</p>
+
+<h4><span style="color: #DE3737">Part 2</h4>
+<p>
+	In this part, a pre-trained deep network with fine-tuning was applied in order to improve the scene recognizer's performance to a higher level.
+</p>
+<p>
+	Since representations learned by deep convolutional networks is generalize surprisingly well to other recognition tasks, a pre-trained deep network was employed. After fine-tuning, its performance did exceed the one with hand-crafted features. Concretely, we took VGG-F network as initiation, and then replace the final layer with random weights, and train the entire network again with images and ground truth labels.
+	<ol>
+		<li>
+			Before tuning the VGG-F network, it is necessary to pre-process the image sample. 
+			<ol>
+				<li>
+					First, the input images need to be in the size of 224 x 224 when returned by getBatch() function. 
+				</li>
+				<li>
+					Secondly, jittering is still a practical method to synthesize training data. 
+				</li>
+				<li>
+					Then, since VGG-F accepts 3 channel (RGB) images, concatenating grayscale images into color images with themselves before feeding them into the network is done. 
+				</li>
+				<li>
+					Last but not least, all the images are zero centered by subtracting the average image which is given by the net.normalization.averageImage.
+				</li>
+			</ol>
+		</li>
+
+		<li>
+			After loading the VGG-F network, we edit the fc8 and softmax layer by removing and specifying them again. Obviously, the parameters of network such as data depth and output data can be modified by changing the resolution of specific layer and also tuning the stride and padding with zeros.
+		</li>
+		<h4><span style="color: #DE3737">The result is shown as below</h4>
+		<h4>Using modified VGG-F network <span style="color: #DE3737">without training the entire network and adding dropout layers</h4>
+		<h4>Training epoch = 10, Learning rate = 0.0001, Accuracy = 84%</h4>
+		<center>
+		<img src="outputs/part2A/filter_epoch10_rate0.0001_withoutDrop.png"/>
+		<img src="outputs/part2A/epoch10_rate0.0001_withoutDrop.png"/>
+		</center>
+		
+		<li>
+			Since the dropout layers were missing from the pretrained model, we also add the dropout layers. First, we try with adding dropout between fc7 and fc8.
+		</li>
+		<h4>Using modified VGG-F network and adding one dropout layer (between fc7 and fc8)</h4>
+		<h4>Training epoch = 30, Learning rate = 0.0001, Accuracy = 90%</h4>
+		<center>
+		<img src="outputs/part2A/filter_epoch30_varrate_Drop_10.png"/>
+		<img src="outputs/part2A/epoch30_varrate_Drop_10.png"/>
+		</center>
+
+		<li>
+			Adding another dropout layer in between fc6 and fc7. The structure of network is shown below:
+		</li>
+		<center>
+		<img src="outputs/deepNetwork.png"/>
+		</center>
+		<h4>Using modified VGG-F network and adding two dropout layers (between fc7 and fc8, also, between fc6 and fc7)</h4>
+		<h4>Training epoch = 5, Learning rate = 0.0001, Accuracy = 84%
+		<center>
+		<img src="outputs/part2A/filter_epoch5_fixrate_2Drop_16.png"/>
+		<img src="outputs/part2A/epoch5_fixrate_2Drop_16.png"/>
+		</center>
+
+		<li>
+			Extra Experiments: we tried to apply varied learning rate with decay, and use number of training epoch correspondingly.
+		</li>
+		<h4>The results are show below: </h4>
+		<h4>1, Training epoch = 13, Learning rate: decaying rate from 10 to the power of -4 to 10 to the power of -5.5, Accuracy = 87%
+		<center>
+		<img src="outputs/part2A/filter_epoch20_varrate_2Drop_13.png"/>
+		<img src="outputs/part2A/epoch20_varrate_2Drop_13.png"/>
+		</center>
+
+		<h4>2, Training epoch = 12, Learning rate = 0.001, whole net was retrained, Accuracy = 88%
+		<center>
+		<img src="outputs/part2A/filter_epoch12_fixrate0.001_2Drop_wholenet_12.png"/>
+		<img src="outputs/part2A/epoch12_fixrate0.001_2Drop_wholenet_12.png"/>
+		</center>
+
+		<h4>3, Training epoch = 12, Decayed learning rate, whole net was retrained, also adding the rotation to synthesize the training image, Accuracy = 88%
+		<center>
+		<img src="outputs/part2A/filter_epoch12_varrate_2Drop_wholenet_rotate_89.png"/>
+		<img src="outputs/part2A/epoch12_varrate_2Drop_wholenet_rotate_89.png"/>
+		</center>
+	</ol>		
+</p>
+
+<h3><span style="color: #DE3737">Discussion</h3>
+<p>
+	Scene recognition is a very common and popular topic in computer vision research area. It has been developed for several decades. Researchers are trying to chase higher score to verify the performance of the scene recognition algorithm. Recently, deep learning was applied into this research topic, and it brings evolutionary improvement. Concretely speaking, the convolutional neural network, characterized by multi-layer structure, sparse connectivity, and weight sharing has already been employed in scene recognition research and achieves higher performance than ever before.
+</p>
+<p>
+	The VGG Convolutional Neural Networks is applied in this project. It has interface for writing code in Matlab, and clear visualization of the stucture of network.
+</p>
+<p>
+	After tuning the parameter of the system, we found:
+	<ol>
+		<li>
+			Jittering (flip and rotation) really improves the performance of scene recognition by 10 to 15 percent
+		</li>
+
+		<li>
+			Dropout is necessary, since convolutional neural network is prone to be overfitted. However, having multiple dropout layers really makes the running time longer. It improves the accuracy by 10 to 15 percent.
+		</li>
+
+		<li>
+			Increasing the filter depth also improves the accuracy, since the each weighting parameter could be trained better. It improves the result by 10 to 15 percent
+		</li>
+
+		<li>
+			Trick: subtracting the "average" from each training image makes accuracy even better. This improves the accuracy by 15 percent
+		</li>
+		<li>
+			There is always tuning work after adding a new layer in the network. Different combinations, orders, and parameters make much difference in terms of the total accuracy, the speed of convergence, and the shape of the error curve. Though, one could reach similar accuracy, the proper order and fine-tuned parameters can reduce the number of training epoch which saves a lot of time.
+	</ol>
+</p>
+
+<p>
+	Future Work:
+	<ol>
+		<li>
+			In our project, the dataset is still small. It just includes only 100 samples per category, and 10 category in total. If we have enough training and testing time, we want to work with larger dataset wich much more samples and image categories like "places" database from MIT. With more training and testing data, we might see other potential ability or problem of CNN.
+		</li>
+		<li>
+			Though we can actually see the structure of the network by running the "cnn_init" script, it is interesting to have a more intuitive visualization of the CNN. This would not only make the CNN easy to understand, but also help manage the parameters of each layer.
+		</li> 
+
+
+
+
+
+</div>
+</body>
+</html>
