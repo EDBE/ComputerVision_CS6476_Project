@@ -1,0 +1,415 @@
+<html>
+<head>
+<title>Computer Vision Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<link rel="stylesheet" href="css/bootstrap.min.css"
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 960px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+td img {
+  vertical-align: middle;
+}
+
+.inner-item {
+	text-align: center;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang <span style="color: #DE3737">(GTID: 902941560)</span></h1>
+</div>
+</div>
+<div class="container">
+
+<h2>CS 4495 / 6476 Project 1: Image Filtering and Hybrid Images</h2>
+
+<div style="float: right; padding: 10px">
+<img src="output/hybrid_image.jpg" />
+<p style="font-size: 18px">			Hybrid Image   </p>
+</div>
+
+<h2>First Part: Image Filtering</h2>
+<h3 style="margin-top:-20px">Method</h3>
+
+<p> 	The algorithm of linear image filter is straightforward which is the convolution between image and the filter. For each pixel, we should take a 'submatrix' surrounding that pixel, whose size is identical to the filter, then multiply each element in submatrix with filter, add them up. Correspondingly, the resulting value will be the value in output image.
+</p>
+<p>
+		In the process of implementing linear image filter in Matlab, we have to consider about the 'edge' problem which is the pixels near the edges of image cannot be computed in the same way as other pixels. Becuase there would not be enough space to have a submatrix. Fortunately, there are several ways to deal with this problem. As for me, I choose the simplest way, zero padding, to solve the problem.
+</p>
+
+<!-- <ol>
+<li>list element 1.</li>
+<li>list element 2.</li>
+<li>etc.</li>
+</ol> -->
+
+
+
+<!-- <div style="clear:both">
+<h3>Example heading</h3>
+
+<p> 	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+ -->
+<h3>Example of code with highlighting</h3>
+<p> 	
+	Since each individual color image has three layers, red, green and blue, and the computation of filtering towards each of them is identical, I started from implementing the function named 'oneDimensionOut' to simplify 'my_imfilter' and try to enhace the readability of my code. 
+</p>
+
+<pre><code>
+%example code
+
+% one dimension filter
+function oneDimensionOut = oneDimensionFilter(image, filter)
+% initialization:    
+    imgHeight = size(image, 1);
+    imgWidth = size(image, 2);
+    filterHeight = size(filter, 1);
+    filterWidth = size(filter, 2);
+    padHeight = (filterHeight - 1) / 2; %padding vertically
+    padWidth = (filterWidth - 1) / 2;   %padding horizontally
+    
+    oneDimensionOut = zeros(imgHeight, imgWidth);
+    pad_oneDimensionOut = zeros(imgHeight + 2*padHeight, imgWidth + 2*padWidth);
+
+% implement function:
+    pad_oneDimensionOut(1 + padHeight: imgHeight + padHeight, 1 + padWidth: imgWidth + padWidth) = image;
+    for i = 1: imgHeight
+        for j = 1: imgWidth
+            box = pad_oneDimensionOut(i: i + 2*padHeight, j: j + 2*padWidth); %get the small matrix surround this pixel
+            oneDimensionOut(i, j) = sum(sum(box .* filter));
+        end
+    end    
+end
+</code></pre>
+
+<p>
+	After having the 'oneDimensionOut' function, I use it in 'my_imfilter' function to deal with the color image which has R/G/B channels.
+</p>	
+
+<code><pre>
+output = zeros(size(image));
+dimension = length(size(image));
+    if (dimension == 1)
+        output = oneDimensionFilter(image, filter);
+    elseif (dimension == 3)
+        for k = 1: 3
+            output(:, :, k) = oneDimensionFilter(image(:, :, k), filter);
+        end
+    end
+end
+
+</code></pre>
+
+<h3 style="margin-top:30px">Result of proj_1_test_filtering</h3>
+<p>click right and life arrows on each side of image to slide: </p>
+<div id="filtering" class="carousel slide">
+  
+  <!-- Wrapper for slides -->
+  <div class="carousel-inner">
+    <div class="item active">
+      <div class="inner-item">
+      	<img src="output/identity_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        Identity Image
+      </div>
+    </div>
+    
+    <div class="item">
+      <div class="inner-item">
+      	<img src="output/blur_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        Blur Image
+      </div>
+    </div>
+    
+    <div class="item">
+      <div class="inner-item">
+      	<img src="output/large_blur_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        Large Blur Image
+      </div>
+    </div>
+    <div class="item">
+      <div class="inner-item">
+      	<img src="output/high_pass_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        High Pass Image
+      </div>
+    </div>
+    
+    <div class="item">
+      <div class="inner-item">
+      	<img src="output/sobel_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        Sobel Image
+      </div>
+    </div>
+    
+    <div class="item">
+      <div class="inner-item">
+      	<img src="output/laplacian_image.jpg" alt="...">
+      </div>
+      <div class="carousel-caption">
+        Laplacian Image
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <a class="left carousel-control" href="#filtering" data-slide="prev">
+    <span class="icon-prev"></span>
+  </a>
+  <a class="right carousel-control" href="#filtering" data-slide="next">
+    <span class="icon-next"></span>
+  </a>
+</div>
+
+
+<h2 style="margin-top: 50px">Second Part: Hybrid Images</h2>
+<h3 style="margin-top:-20px">Method</h3>
+
+
+<p>To make a hybrid image of two original ones, we basically have three steps:</p>
+<ol>
+	<li>
+		Remove the high frequencies from image1 by applying Gaussian blur
+		<pre><code>low_frequencies = my_imfilter(image1, filter);</code></pre>
+	</li>
+	
+	<li>
+		Remove the low frequencies from image2 by substract the low frequencies of it from original image
+		<pre><code>high_frequencies = image2 - my_imfilter(image2, filter);</code></pre>
+	</li>
+	
+	<li>
+		Combine the high frequencies and low frequencies
+		<pre><code>hybrid_image = low_frequencies + high_frequencies;</code></pre>
+	</li>		
+
+<table border=1>
+<tr>
+<td>
+<img src="output/low_frequencies.jpg" width="24%"/>
+<img src="output/high_frequencies.jpg"  width="24%"/>
+<img src="output/hybrid_image.jpg" width="24%"/>
+<img src="output/hybrid_image_scales.jpg" width="24%"/>
+</td>
+</tr>
+</table>
+
+
+
+<h3 style="margin-top:100px">Discussion</h3>
+
+<p>Based on the theory of image filtering and experiment in Matlab, the cutoff frequency is critical for image hybrid. We need to modify the cutoff frequency for different images in order to get the best result. Here are hybrid images with different cutoff frequency (click right and life arrows on each side of image to slide): 
+</p>
+
+<div id="hybrids">
+</div>
+
+<div style="clear:both" >
+<p><br /></p>
+</div>
+<script src="js/jquery.min.js"></script>  
+<script src="js/bootstrap.js"></script>  
+<script src="highlighting/highlight.pack.js"></script>
+<script type="text/javascript">
+
+function get_carousel(name, text) {
+	return '<h3 style="text-align:center">'+ text + '</h3>' +
+				'<div id="' + name + '" class="carousel slide">' +
+					 '<div class="carousel-inner">'+
+						'<div class="item active">' +
+						 ' <div class="inner-item">' +
+							'  <img src="output/hybrids/' + name +'/low_frequencies.jpg" alt="...">' +
+							 ' <div class="carousel-caption">' +
+								'Low frequencies' +
+							  '</div>' +
+						  '</div>' +
+						'</div>' +
+
+						'<div class="item">' +
+						 ' <div class="inner-item">' +
+							'  <img src="output/hybrids/' + name +'/high_frequencies.jpg" alt="...">' +
+							 ' <div class="carousel-caption">' +
+								'High frequencies' +
+							  '</div>' +
+						  '</div>' +
+						'</div>' +
+
+						'<div class="item">' +
+						 ' <div class="inner-item">' +
+							'  <img src="output/hybrids/' + name +'/hybrid_image.jpg" alt="...">' +
+							 ' <div class="carousel-caption">' +
+								'Hybrid Image' +
+							  '</div>' +
+						  '</div>' +
+						'</div>' +
+
+						'<div class="item">' +
+						 ' <div class="inner-item">' +
+							'  <img src="output/hybrids/' + name +'/hybrid_image_scale.jpg" alt="...">' +
+							 ' <div class="carousel-caption">' +
+								'Hybrid Image scales' +
+							  '</div>' +
+						  '</div>' +
+						'</div>' +
+
+					 ' </div>' +
+					  '<a class="left carousel-control" href="#' +  name+ '" data-slide="prev">' +
+						'<span class="icon-prev"></span>' +
+					 ' </a>' +
+					  '<a class="right carousel-control" href="#' +  name+ '" data-slide="next">' +
+						'<span class="icon-next"></span>' +
+					  '</a>' +
+					'</div>';
+}
+
+    var hybrids = {}
+    hybrids['einstein_marilyn'] = 'Einstein/Marilyn (cutoff_frequency = 5)';
+	hybrids['fish_submarine'] = 'Fish/Submarine (cutoff_frequency = 7)';
+    hybrids['bird_plane'] =  'Bird/Plane (cutoff_frequency = 6)';
+    hybrids['bike_motor'] = 'Bicycle/Motorcycle (cutoff_frequency = 7)';
+    
+    
+   
+    
+    var images = ['low_frequencies.jpg', 'high_frequencies.jpg', 'hybrid_image.jpg', 'hybrid_image_scale.jpg'];
+    var path = 'output/hybrids/';
+    $('document').ready(function() {
+        for (var name in hybrids) {
+            $('#hybrids').append(get_carousel(name, hybrids[name]));            
+        }
+    });
+
+
+</script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>

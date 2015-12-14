@@ -1,0 +1,288 @@
+<html>
+<head>
+<title>Face Detection Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang </h1>
+<h1><span style="color: #DE3737">GT ID:</span> 902941560 </h1>
+</div>
+</div>
+<div class="container">
+
+<h2> CS6476: Project 5 / Face Detection with a Sliding Window</h2>
+
+<!-- <div style="float: right; padding: 20px">
+<img src="placeholder.jpg" />
+<p style="font-size: 14px">Example of a right floating element.</p>
+</div> -->
+
+<h3><span style="color: #DE3737">Goal</h3>
+<p>
+In this project, we want to implement the face detector by independently classifying all image patches as being face or non-face.
+</p>
+
+<h3><span style="color: #DE3737">Method</h3>
+<p>
+	To achieve the function of face detection, we divide the project into three steps:
+<ol>
+
+<li>Getting training features: according to Dalal and Triggs's paper, the feature can be represented by the Histogram of Oriented Gradients (HOG). Correspondingly, we compute the feature using HOG. In baseline implementation, we use 6 as number of orientation, and then 9 to test the performance
+	<ul>
+		<li>Positive images are taken from the Caltech database, and cropped and resized into 36 x 36</li>
+		<li>Negative images are randomly taken from a database of non-face images</li>
+	</ul>
+</li>
+
+<li>
+	Training Classifier: Support Vector Machine is used to train a classifier that is able to detect faces from non-faces. SVM works well for high-dimensional data, since it is fast to train and fast to execute. With fine tuning the regularization parameter, lambda, of SVM, the performance of classifier gets better
+</li>
+
+<li>
+	Running face detector on test images: for each image, run the classifier at multiple scales and then use non-maximum suppresion to remove the duplicate detections
+</li>
+</ol>
+
+
+<h3><span style="color: #DE3737">Results</h3>
+<h4>Face Template HOG Visualization</h4>
+<center>
+<h4> Cell Size = 6 </h4>
+<img src="outputs/cellStep6/Thres0.85/hog_template.png"/>
+
+<h4> Cell Size = 9 </h4>
+<img src="outputs/cellStep4/Thres0.85/hog_template.png"/>
+</center>
+
+<h4>Threshold = 0.5,  cell size = 6, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep6/Thres0.5/average_precision.png"/>
+<img src="outputs/cellStep6/Thres0.5/recall.png"/>
+
+<center>
+<img src="outputs/cellStep6/Thres0.5/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.5/detections_class57.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.5/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.5/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.5/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.5/detections_original1.jpg.png"/>
+</center>
+
+<h4>Threshold = 0.75, cell size = 6, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep6/Thres0.75/average_precision.png"/>
+<img src="outputs/cellStep6/Thres0.75/recall.png"/>
+
+<center>
+<img src="outputs/cellStep6/Thres0.75/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.75/detections_class57.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.75/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.75/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.75/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.75/detections_original1.jpg.png"/>
+</center>
+
+<h4>Threshold = 0.85, cell size = 6, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep6/Thres0.85/average_precision.png"/>
+<img src="outputs/cellStep6/Thres0.85/recall.png"/>
+<center>
+<img src="outputs/cellStep6/Thres0.85/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.85/detections_class57.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.85/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.85/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.85/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep6/Thres0.85/detections_original1.jpg.png"/>
+</center>
+
+<h4>Threshold = 0.5,  cell size = 9, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep4/Thres0.5/average_precision.png"/>
+<img src="outputs/cellStep4/Thres0.5/recall.png"/>
+<center>
+<img src="outputs/cellStep4/Thres0.5/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.5/detections_class57.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.5/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.5/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.5/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.5/detections_original1.jpg.png"/>
+</center>
+
+<h4>Threshold = 0.75, cell size = 9, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep4/Thres0.75/average_precision.png"/>
+<img src="outputs/cellStep4/Thres0.75/recall.png"/>
+<center>
+<img src="outputs/cellStep4/Thres0.75/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.75/detections_class57.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.75/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.75/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.75/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.75/detections_original1.jpg.png"/>
+</center>
+
+<h4>Threshold = 0.85, cell size = 9, Multi-scale Factor = 0.85</h4>
+<img src="outputs/cellStep4/Thres0.85/average_precision.png"/>
+<img src="outputs/cellStep4/Thres0.85/recall.png"/>
+<center>
+<img src="outputs/cellStep4/Thres0.85/detections_Argentina.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.85/detections_class57.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.85/detections_ds9.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.85/detections_ew-friends.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.85/detections_hendrix1-bigger.jpg.png"/>
+<img src="outputs/cellStep4/Thres0.85/detections_original1.jpg.png"/>
+
+</center>
+
+<h4>
+	Bonus test scenes (using cell size = 9, threshold = 0.75, multi-scale factor = 0.85)
+</h4>
+<center>
+<img src="outputs/extra_scene/cellStep4/CS143_easy.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_hard.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_01_easy.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_01_hard.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_02_easy.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_02_hard.png"/>
+<img src="outputs/extra_scene/cellStep4/CS143_03_hard.png"/>
+</center>
+
+<h3><span style="color: #DE3737">Discussion</h3>
+<p>
+	In this project, the functions implementation is quite straightforward, but tuning the parameters makes huge difference in terms of performance of face detector.
+	<ul>
+		<li>In run_detector function, I worked with threshold value of 0.5, 0.75, and 0.85 respectively. The higher the threshold is, the lower the average precision will be, since higher threshold incline to penalize the false positive. Obviously, we can see more red rectangulars in threshold of 0.5 than 0.85</li>
+		<li>In run_detector function, the improving rate of downsample also helps enhace the performance. We started to use the rate of 0.7 to debug, then end up with 0.85 to test the performance. The best average precision under this situation is 0.892.</li>
+		<li>The size of HOG cell also makes contribution to the performance. In our test, the best average precision under size of 6 is 0.840, and size of 9 is 0.892
+		<li>For SVM, regularization factor, lambda, is the key to the performance. In our experiment, lambda = 0.0001 works best</li>
+</p>
+
+</body>
+</html>

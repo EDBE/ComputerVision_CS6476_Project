@@ -1,0 +1,1 @@
+I tried to use 4495_2015_class_easy.jpg as test image. For some unknown reason, I cannot run the detector on it, though it runs smoothly on any other test images. Cannot figure out why. Would you mind to try to test it? Thank you!

@@ -1,0 +1,436 @@
+<html>
+<head>
+<title>Computer Vision Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang <span style="color: #DE3737">(GT ID: 902941560)</span></h1>
+</div>
+</div>
+<div class="container">
+
+<h2> Project 3 / Camera Calibration and Fundamental Matrix Estimation with RANSAC</h2>
+
+
+
+<h2>Part1: Camera Projection Matrix</h2>
+
+<p>
+In this part, I compute the camera projection matrix.
+
+
+<div style="float: right; padding: 20px">
+<img src="outputs/part1_matrix.png" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+
+<pre><code>
+	
+[rows cols] = size(Points_3D);
+%Initiate A
+A = zeros(rows * 2, 12);   
+%Compute A
+for r = 1: rows
+   A(2*r-1, :) = [Points_3D(r, 1) Points_3D(r, 2) Points_3D(r, 3) 1 0 0 0 0 ...
+                  -Points_2D(r, 1)*Points_3D(r, 1) -Points_2D(r, 1)*Points_3D(r, 2)...
+                  -Points_2D(r, 1)*Points_3D(r, 3) -Points_2D(r, 1)]; 
+                
+   A(2*r, :)   = [0 0 0 0 Points_3D(r, 1) Points_3D(r, 2) Points_3D(r, 3) 1 ...
+                  -Points_2D(r, 2)*Points_3D(r, 1) -Points_2D(r, 2)*Points_3D(r, 2) ...
+                  -Points_2D(r, 2)*Points_3D(r, 3) -Points_2D(r, 2)];
+end 
+%Compute the eigenvalues and corresponding eigenvectors of A' * A
+[eigenVector eigenValue] = eig(A' * A);
+ 
+%The eigenvector m corresponding to the minimal eigenvalue
+m = eigenVector(:, 1);
+
+%Convert m to a 3 by 4 matrix M
+M = vec2mat(m, 4);	
+
+</code></pre>
+
+The residue is 0.0445
+
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 1</th>
+            <th>Figure 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part1-1.png" /></td>
+            <td><img src="outputs/P3_part1-2.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+</p>
+
+
+<p>
+To optimize the computation of camera projection matrix, I pick three point set size, k = 8, 12, 16, repeat 10 times:
+
+<ol>
+    <li>Randomly choose k points from 2D list and their corresponding points in 3D list</li>
+    <li>Compute the projection matrix M on those points</li>
+    <li>Pick 4 points not in my set of k and compute the average residue</li>
+    <li>Find the matrix that gives the lowest residue</li>
+</ol>
+
+<div style="float: right; padding: 20px">
+<img src="outputs/part1_matrix2.png" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+<pre><code>
+	
+[rows cols] = size(Points_3D);
+k_s = [8; 12; 16];   %k = 8, 12, 16
+M_matrix = cell(3, 10); %This will contain 30 matrices M
+residue_matrix = zeros(3, 10);   %This will contain 30 residues, correspondingly
+
+for num = 1: 3
+    k = k_s(num);
+    for times = 1: 10   %Repeat 10 times
+        randomSorting = randperm(rows);
+        indexM = randomSorting(1, 1:k); %pick up the first k entries as the indecies of 2D and 3D points
+        indexR = randomSorting(1, k+1: k+4);
+        % Compute A
+        A = zeros(k*2, 12);
+        for r = 1: k
+            A(2*r-1, :) = [Points_3D(indexM(r), 1) Points_3D(indexM(r), 2) Points_3D(indexM(r), 3) 1 0 0 0 0 ...
+                  -Points_2D(indexM(r), 1)*Points_3D(indexM(r), 1) -Points_2D(indexM(r), 1)*Points_3D(indexM(r), 2)...
+                  -Points_2D(indexM(r), 1)*Points_3D(indexM(r), 3) -Points_2D(indexM(r), 1)]; 
+                
+            A(2*r, :)   = [0 0 0 0 Points_3D(indexM(r), 1) Points_3D(indexM(r), 2) Points_3D(indexM(r), 3) 1 ...
+                  -Points_2D(indexM(r), 2)*Points_3D(indexM(r), 1) -Points_2D(indexM(r), 2)*Points_3D(indexM(r), 2) ...
+                  -Points_2D(indexM(r), 2)*Points_3D(indexM(r), 3) -Points_2D(indexM(r), 2)];
+        end 
+        [eigenVector eigenValue] = eig(A' * A);
+        m = eigenVector(:, 1);
+        M = vec2mat(m, 4);
+        residue = 0;
+        for i = 1: 4
+            estimated_2D_Homo_pixel = M * [Points_3D(indexR(i), 1: 3) 1]';
+            estimated_2D_pixel = [estimated_2D_Homo_pixel(1)/estimated_2D_Homo_pixel(3);...
+                                 estimated_2D_Homo_pixel(2)/estimated_2D_Homo_pixel(3)];
+            residue = residue + sqrt((estimated_2D_pixel(1)-Points_2D(indexR(i), 1))^2+...
+                                     (estimated_2D_pixel(2)-Points_2D(indexR(i), 2))^2);
+        end
+        residue_matrix(num, times) = residue / 4;
+        M_matrix(num, times) = {M};
+    end
+end
+
+[min_residue index] = min(residue_matrix(:));    %find the minimal residue and find the best M
+[i j] = ind2sub(size(residue_matrix), index);
+best_M = M_matrix{i, j};
+
+Projection = best_M*[Points_3D ones(size(Points_3D,1),1)]';
+Projection = Projection';
+u = Projection(:,1)./Projection(:,3);
+v = Projection(:,2)./Projection(:,3);
+
+Projected_2D_Pts = [u v];
+
+</code></pre>
+The residue is 0.5106
+
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 3</th>
+            <th>Figure 4</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part1-Extra1.png" /></td>
+            <td><img src="outputs/P3_part1-Extra2.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+</p>
+
+
+<h2>Part2: Fundamental Matrix Estimation</h2>
+
+<p>
+In this part, I implement the function of fundamental matrix estimation, and also the funciton of drawing epipolar line by myself. The function is named "draw_epipolar_line2.m"
+
+<div style="float: up; padding: 20px">
+<img src="outputs/part2_matrix1.png" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+
+<pre><code>
+[rows cols] = size(Points_a);
+A = zeros(rows, 9);
+
+%Compute A
+for r = 1: rows
+    A(r, :) = [Points_a(r, 1)*Points_b(r, 1) Points_a(r, 1)*Points_b(r, 2) Points_a(r, 1) Points_a(r, 2)*Points_b(r, 1) ...
+               Points_a(r, 2)*Points_b(r, 2) Points_a(r, 2) Points_b(r, 1) Points_b(r, 2) 1];        
+end    
+[eigenVector eigenValue] = eig(A' * A);
+tildef = eigenVector(:, 1);
+tildeF = vec2mat(tildef, 3);
+%Fundamental matrix F with Full Rank
+F_matrix = rank(tildeF);
+
+[U, S, V] = svd(tildeF);
+S(3, 3) = 0;
+
+%Fundamental matrix F with rank 2
+F_matrix = U * S * V';
+
+
+</code></pre>
+
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 5</th>
+            <th>Figure 6</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part2-1.png" /></td>
+            <td><img src="outputs/P3_part2-1.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+</p>
+
+
+
+
+<h2>Part3: Fundamental Matrix with RANSAC</h2>
+
+<p>
+	Now, we have keypoints, descriptors, and matches. To implement RANSAC, use the matched keypoints for imageA and imageB, randomly select one of the putative matches. This can provide you an offset between two images. Find out how many other putative matches agree with this offset with a particular tolerance. Then, find the best such translation, which is the one with the biggest consensus set.
+</p>
+
+<p> In this part, I tried to normalize the coordinates before computing the fundamental matrix. The output is better than previous fundamental matrix estimation.
+</p>  
+<p>
+Here are several output of RANSAC:
+<p>1, Mount Rushmore</p>
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 7</th>
+            <th>Figure 8</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part3_1.png" /></td>
+            <td><img src="outputs/P3_part3_2.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="float: up; padding: 20px">
+<img src="outputs/vis_arrows_1.jpg" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+</p>
+
+<p>
+<p>2, Notre Dame</p>
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 9</th>
+            <th>Figure 10</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part3_3.png" /></td>
+            <td><img src="outputs/P3_part3_4.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="float: up; padding: 20px">
+<img src="outputs/vis_arrows_2.png" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+</p>
+
+<p>
+<p>3, Episcopal Gaudi</p>
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Figure 11</th>
+            <th>Figure 12</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/P3_part3_5.png" /></td>
+            <td><img src="outputs/P3_part3_6.png" /></td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="float: up; padding: 20px">
+<img src="outputs/vis_arrows_3.png" />
+<!-- <p style="font-size: 14px">Example of a right floating element.</p> -->
+</div>
+
+</p>
+
+</body>
+</html>

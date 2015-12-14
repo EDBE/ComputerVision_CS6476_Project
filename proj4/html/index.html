@@ -1,0 +1,236 @@
+<html>
+<head>
+<title>CS6476 / Project 4/ Recognition with Bag of Words</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 1160px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table td img {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang <span style="color:#DE3737">(GT ID: 902941560)</span></h1>
+<h1></h1>
+</div>
+</div>
+<div class="container">
+
+<h2>CS6476 / Project 4 / Scene Recognition with Bag of Words</h2>
+
+<!-- <div style="float: right; padding: 20px">
+<img src="placeholder.jpg" />
+<p style="font-size: 14px">Example of a right floating element.</p>
+</div> -->
+
+<h3>1, Goal</h3>
+<p>The goal of this project is to implement the scene recognition with different methods with various complexity.</p>
+
+<h3>2, Method</h3>
+<p>In order to realize the scene recognition, the implementation can be divided into two steps:</p>
+
+<ol>
+<li>Feature computation: basically, it aims to represent an image as a vector which contains feature information</li>
+<ul>
+    <li>I start with the tiny image representation, which basically resizes the image to a given size, and then reshape it into a vector</li>
+    <li>Then, I implement a more complex representation which is Bag of SIFT. It finds the SIFT descriptors of 16x16 patches computed over a grid of equal spacing,  and then quantize them into a certain discrete types, finally count the frequency of those types appearing in the image</li>
+</ul>
+<h3></h3>
+<li>Scene Recognition: given the set of training features and training labels, we want to find a mapping from any vector to a scene label</li>
+<ul>
+    <li>I implemented the K-Nearest Neighbor classification, which find the K training images that are nearest to a given test image, and return the scene label that is dominant among them</li>
+    <li>I also implemented the linear Support Vector Machine classifier which tries to find the a line that is able of separate images in a specific category from images not in that category</li>
+</ul>
+</ol>
+
+<h3>3, Results (Click on image to have the details)</h3>
+
+
+
+<ol>
+    <li>Tiny image + K Nearest Neighbor
+
+        <p>
+        Accuracy (mean of the values on diagonal in confusion matrix) is 22.1%
+        </p>
+        <a href="tiny_knn/index.html">
+        	<img src="tiny_knn/confusion_matrix.png"></a>      
+    </li>
+    
+    <li>Bag of SIFT + K Nearest Neighbor
+        <p>
+        Accuracy (mean of the values on diagonal in confusion matrix) is 51.5%
+        </p>
+        <a href="sift_knn/index.html"><img src="sift_knn/confusion_matrix.png"></a>
+        
+    </li>
+    <li>Bag of SIFT + linear SVM
+         <p>
+        Accuracy (mean of the values on diagonal in confusion matrix) is 63.5% 
+        </p>
+        <a href="sift_svm/index.html"><img src="sift_svm/confusion_matrix.png"></a>
+
+    </li>
+</ol>
+
+<h3>4, Discussion: Effect of vocabulary size</h3>
+<p>Obviously, the size of vocabulary is the parameter which we can tune in the Bag of SIFT. Theoratically, we're compressing the feature vectors by reducing the vocabulary size, and correspondingly, increasing the vocabulary size makes the visual words more fine-grained. I tried to investigate how the performance varies with different vocabulary sizes, their correlation is shown in the graph below:</p>
+
+<div>
+    <img src="output/vocab_sizes.png" />
+</div>
+<p>We can see that the performance improves vastly with vocabulary size going from 20 to 200 but slowly for larger vocabuary sizes. This is could be explained by the fact of as more clusters are introduced, the chance for noise and the number of dimension in the feature vector also increases.</p>
+
+
+
+<h3>5, Graduate Credit: </h3>
+<h4>1, Soft assignment </h4>
+<p>According to Chatfield, one disadvantage of vector quantization is that two features assigned to two different (even very close) clusters are considered totally different. To solve this problem, Chatfield experimented with "soft assignment", which is basically each feature is assgined with a given weight to several visual words nearby in the feature space. The key point in this approach is that the weight assigned is proportional to the exponential of the negative distance from the feature to the visual word. Theoratically, the "kernel codebook encoding" is able to improve the accuracy of scene recognition. My implementation is as below: </p>
+
+<pre><code>
+[indices, distances] = knnsearch(vocab, features', 'K', 3);
+N_features = size(features,2);
+weights = exp(-0.5*(distances.^2)./variance);
+for u=1:N_features
+    for v=1:K
+        image_feats(ii, indices(u,v)) = weights(u,v) + image_feats(ii, indices(u,v));
+    end
+end
+</code></pre>
+<p>Unfortunately, I could NOT see the obvious performance improvement from 'soft assignment'.</p>
+
+<h4>2, Spatial Pyramid (Unfinished)</h4>
+<p>
+	I also tried to implement the spatial pyramid matching since it achieved very high accuracy for recognizing scene categories. But I did not finish it in time, though it seems to be not very difficult. I will do it later and try to see the improvement of performance.
+</p>
+
+
+
+</body>
+</html>

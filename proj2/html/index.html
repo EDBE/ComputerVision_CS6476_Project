@@ -1,0 +1,460 @@
+<html>
+<head>
+<title>Computer Vision Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;	
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 960px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+td img {
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1>Liang Tang<span style="color: #DE3737"> ( GT ID: 902941560 )</span></h1>
+</div>
+</div>
+<div class="container">
+
+<h2>CS 4495 / 6476 Project 2: Local Feature Matching</h2>
+
+<div style="float: right; padding: 20px">
+<img src="outputs/Example.jpg" />
+<p style="font-size: 18px">The top 100 most confident local feature matches from a baseline implementation. In this case, 93 were correct (highlighted in green) and 7 were incorrect (highlighted in red)</p>
+</div>
+
+<p> 	
+In this project, I tried to implement a local feature matcher which is able to detect local features in two images. These two images are taken of a same physical scene but from different views, also under different illumination. A qualified and robust feature matcher can always find their correspondence accurately.
+</p>
+
+<p>
+There are actually several different algorithms of local feature matching. In this project, I choose a simplified version of the famous SIFT pipeline. To make it easier to be implemented, I break down the project into three steps:
+</p>
+
+<ol>
+<li>Interest point detection: Find interest points in each image</li>
+<li>Local feature description: Compute a descriptor vector for each interest point</li>
+<li>Feature matching: Find correspondence between features of two images</li>
+</ol>
+
+	
+<h2>Step 1: Interest point detection</h2>
+
+
+<p>
+	Interest points detection is also called key points detection. Having a small window in a given image is pre-requisite of detection. If shifting the window in any direction gives a large change in terms of intensity, then there is a high change that the window contains a key point.
+</p>
+
+<p>
+	I implemented the Harris Corner Detector as described in the lecture and the textbook (Szeliski 4.1.1).
+</p>	
+
+<ol>
+    <li>Compute the x and y gradients of the image by convolving it with a derivative of Gaussian (variance = 1), named them 'ix' and 'iy'</li>
+    <li>Compute ix_x = ix.*ix, iy_y = iy.*iy, ix_y = ix.*iy (elements in the second moment matrix)</li>
+    <li>Convolve each of the three images above with a larger Gaussian (variance = 2), call them g(ix_x), g(iy_y), g(ix_y)</li>
+    <li>Compute the cornerness function given by g(ix_x)g(iy_y) - g(ix_y)^2- alpha*(g(ix_x) + g(iy_y))^2</li>
+    <li>Execute non-maxima suppression</li>
+</ol>
+
+<h3>Corresponding Matlab Code:</h3>
+<!-- The javascript in the <code>highlighting</code> folder is configured to do syntax highlighting in code blocks such as the one below.<p> -->
+
+<pre><code>
+	alpha = 0.04;
+	gaussian = fspecial('Gaussian', [25, 25], 1);
+	[gx, gy] = imgradientxy(gaussian);
+
+	ix = imfilter(image, gx);
+	iy = imfilter(image, gy);
+
+	% Process gradients near edges
+	ix([(1: feature_width) end - feature_width + (1: feature_width)], :) = 0;
+	ix(:, [(1: feature_width) end - feature_width + (1: feature_width)]) = 0;
+	iy([(1: feature_width) end - feature_width + (1: feature_width)], :) = 0;
+	iy(:, [(1: feature_width) end - feature_width + (1: feature_width)]) = 0;
+
+	large_gaussian = fspecial('Gaussian', [25, 25], 2);
+	ix_x = imfilter(ix.*ix, large_gaussian);
+	ix_y = imfilter(ix.*iy, large_gaussian);
+	iy_y = imfilter(iy.*iy, large_gaussian);
+	har = (ix_x .* iy_y) - (ix_y .* ix_y) - alpha .* (ix_x+iy_y).*(ix_x+iy_y);
+
+</code></pre>
+
+<p>
+	The non-maxima suppresion is critical for the accuracy of interesting point detection. Firstly, I tried to use a window to slide across the image and keep track on the maxima in each window. Then, I also implemented a threshold cornerness function which is able to keep only the local maxima that is above the threshold in each connected components.
+</p>
+
+<p>
+	Using connected components is much faster than sliding window in Matlab (about ten times faster), and the result is quite similar. More importantly, sliding window is more susceptible to the edges than connected components.
+</p>	
+
+<h3>Corresponding Matlab Code:</h3>
+<!-- The javascript in the <code>highlighting</code> folder is configured to do syntax highlighting in code blocks such as the one below.<p> -->
+
+<pre><code>
+switch sliding
+    case 1
+        har = har .* threshold;
+        har_max = colfilt(har, [feature_width feature_width], 'sliding', @max);
+        har = har .* (har == har_max);
+        
+        [y, x] = find(har > 0);
+        confidence = har(har > 0);
+        
+    case 0
+        components = bwconncomp(threshold);
+        width = components.ImageSize(1);
+        x = zeros(components.NumObjects, 1);
+        y = zeros(components.NumObjects, 1);
+        confidence = zeros(components.NumObjects, 1);
+        for j = 1: (components.NumObjects)
+            pixel_ids = components.PixelIdxList{j};
+            pixel_values = har(pixel_ids);
+            [max_value, max_id] = max(pixel_values);
+            x(j) = floor(pixel_ids(max_id) / width);
+            y(j) = mod(pixel_ids(max_id), width);
+            confidence(j) = max_value;
+        end 
+end
+</code></pre>
+
+
+<div style="clear:both" />
+<table class="table_2">
+    <thead>
+        <tr>
+            <th>Sliding window</th>
+            <th>Connected components</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src="outputs/sliding1.jpg" /></td>
+            <td><img src="outputs/connected_components1.jpg" /></td>
+        </tr>
+        <tr>
+            <td><img src="outputs/sliding2.jpg" /></td>
+            <td><img src="outputs/connected_components2.jpg" /></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<h2 style = "margin-top: 80px">Step 2: Local Feature Description</h2>
+
+<p>The SIFT pipeline is used for building local feature descriptors.</p>
+
+<ol>
+    <li>Get a frame of size <strong>feature_width * feature_width</strong> surrounding each key point</li>
+    <li>Divide each frame into 16 cells </li>
+    <li>Compute the gradient histogram for each cell by 8 bins</li>
+    <li>The resulting descriptor is 128 dimensions (16*8 = 128). It is formed by concatenating the gradient histograms of the 16 cells.</li>
+</ol>
+
+<h3>Corresponding Matlab Code:</h3>
+<!-- The javascript in the <code>highlighting</code> folder is configured to do syntax highlighting in code blocks such as the one below.<p> -->
+
+<pre><code>
+features = zeros(size(x,1), 128);
+
+small_gaussian = fspecial('Gaussian', [feature_width feature_width], 1);
+large_gaussian = fspecial('Gaussian', [feature_width feature_width], feature_width / 2);
+
+[gx, gy] = imgradientxy(small_gaussian);
+ix = imfilter(image, gx);
+iy = imfilter(image, gy);
+
+get_octant = @(x, y) (ceil(atan2(y, x) / (pi / 4)) + 4);
+
+orients = arrayfun(get_octant, ix, iy);
+mag = hypot(ix, iy);
+c_size = feature_width / 4;
+
+num_points = size(x, 1);
+for i = 1: num_points
+    frame_x_range = (x(i) - 2*c_size): (x(i) + 2*c_size-1);
+    frame_y_range = (y(i) - 2*c_size): (y(i) + 2*c_size-1);
+    
+    frame_mag = mag(frame_y_range, frame_x_range);
+    frame_mag = frame_mag .* large_gaussian;
+    frame_orients = orients(frame_y_range, frame_x_range);
+    
+    %iterating each little cell in frame
+    for x_x = 0: 3
+        for y_y = 0: 3
+            cell_orients = frame_orients(x_x*4+1: x_x*4+4, y_y*4+1: y_y*4+4);
+            cell_mag = frame_mag(x_x*4+1: x_x*4+4, y_y*4+1: y_y*4+4);
+            for j = 1: 8
+                f = cell_orients == j;
+                features(i, (x_x*32 + y_y*8) + j) = sum(sum(cell_mag(f)));
+            end
+        end
+    end
+end
+
+features = diag(1 ./ sum(features, 2)) * features;
+
+end
+	
+</code></pre>
+
+<h4>Question here: </h4>
+<p>
+	Is there any data structure could simplified this 4 layers nested 'for' loop? It is a little bit painfully slow in Matlab.
+</p>
+
+
+<div style="clear:both" />
+<table class="table_2">
+    <tr>
+        <td colspan="2" align="center"><b>Feature frames</b></td>
+    </tr>
+    <tr>
+        <td><img src="outputs/frames1.jpg" /></td>
+        <td><img src="outputs/frames2.jpg" /></td>
+    </tr>
+</table>
+
+
+<h2 style = "margin-top: 80px">Step 3: Feature Matching</h2>
+
+<p>
+	According the textbook 4.1.3, the feature matching can be implemented by using distance ratio matching.
+</p>
+
+<ol>
+    <li>Compute the distance matrix between the set of key points of the two images</li>
+    <li>Sort the distance matrix by row</li>
+    <li>Take the rows that has the ratio of the nearest neighbor and the second nearest neighbor below a certain threshold</li>
+</ol>
+
+
+<h2>Outputs of my Matlab code:</h2>
+<table class="table_1" align="center">
+	<tr>
+        <td>1, Notre Dame: 21 good matches, 6 bad matches (Accuracy = 78%)</td>
+    <tr>
+        <td><img src="outputs/result/Notre_Dame_eval.jpg"/></td>
+    <tr>
+        <td><img src="outputs/result/Notre_Dame_dots.jpg"/></td>
+    <tr>
+        <td><img src="outputs/result/Notre_Dame_arrows.jpg"/></td>
+    
+    </tr>
+</table>
+<!-- <h3 style="margin-top:-20px">Method</h3> -->
+<table style = "margin-top: 50px" class="table_1" align="center">
+	<tr>
+        <td>2, Mount Rushmore: 31 good matches, 6 bad matches (Accuracy = 83%)</td>
+    <tr>
+        <td><img src="outputs/result/Mount_Rushmore_eval.jpg" width = 100%/></td>
+    <tr>
+        <td><img src="outputs/result/Mount_Rushmore_dots.jpg" width = 100%/></td>
+    <tr>
+        <td><img src="outputs/result/Mount_Rushmore_arrows.jpg" width = 100%/></td>
+    
+    </tr>
+</table>
+
+<table style = "margin-top: 50px" class="table_1" align="center">
+	<tr>
+        <td>3, Sleeping Beauty: </td>
+    <tr>
+        <td><img src="outputs/result/Sleeping_Beauty_dots.jpg" width = 100%/></td>
+    <tr>
+        <td><img src="outputs/result/Sleeping_Beauty_arrows.jpg" width = 100%/></td>
+    
+    </tr>
+</table>
+
+<table style = "margin-top: 50px" class="table_1" align="center">
+	<tr>
+        <td>4, Pantheon Paris: </td>
+    <tr>
+        <td><img src="outputs/result/Pantheon_Paris_dots.jpg" width = 100%/></td>
+    <tr>
+        <td><img src="outputs/result/Pantheon_Paris_arrows.jpg" width = 100%/></td>
+    
+    </tr>
+</table>
+
+<table style = "margin-top: 50px" class="table_1" align="center">
+	<tr>
+        <td>5, Sacre Coeur: </td>
+
+    <tr>
+        <td><img src="outputs/result/Sacre_Coeur_dots.jpg" width = 100%/></td>
+    <tr>
+        <td><img src="outputs/result/Sacre_Coeur_arrows.jpg" width = 100%/></td>
+    
+    </tr>
+</table>
+
+
+
+<h2 style="margin-top: 80px">Result Review and Analysis</h2>
+<ul>
+    <li>For interest points finding, using threshold and then find local maxima of connected components is much faster than using a sliding window. The results are relatively identical</li>
+
+	<li>Since we are using a fixed frame size (<strong>feature_width</strong>), choosing two images of similar sizes would provide much better results. However, we can also try to detect keypoints at multiple scales, and build the features at the corresponding scales.</li>
+
+
+    <li>Since the frame size is only 16x16, the variance of the gaussian used to compute horizontal and vertical gradients shouldn't be too big. When the variance is growing bigger, the accuracy of result could be lower.</li>
+    
+
+<!-- <div style="clear:both">
+<h3>Example heading</h3>
+
+<p> 	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+
+
+<h3>Results in a table</h3>
+
+<table border=1>
+<tr>
+<td>
+<img src="placeholder.jpg" width="24%"/>
+<img src="placeholder.jpg"  width="24%"/>
+<img src="placeholder.jpg" width="24%"/>
+<img src="placeholder.jpg" width="24%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="placeholder.jpg" width="24%"/>
+<img src="placeholder.jpg"  width="24%"/>
+<img src="placeholder.jpg" width="24%"/>
+<img src="placeholder.jpg" width="24%"/>
+</td>
+</tr>
+
+</table>
+
+<div style="clear:both" >
+<p> 	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+</div> -->
+</body>
+</html>
